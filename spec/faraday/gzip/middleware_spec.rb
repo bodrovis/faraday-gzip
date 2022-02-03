@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Faraday::Gzip::Middleware do
+  require 'brotli'
+  
   let(:headers) { {} }
   let(:middleware) do
     described_class.new(lambda { |env|
