@@ -5,12 +5,12 @@ require_relative 'lib/faraday/gzip/version'
 Gem::Specification.new do |spec|
   spec.name = 'faraday-gzip'
   spec.version = Faraday::Gzip::VERSION
-  spec.authors = ['']
-  spec.email = ['']
+  spec.authors = ['Ilya Bodrov-Krukowski']
+  spec.email = ['golosizpru@gmail.com']
 
-  spec.summary = ''
+  spec.summary = 'Automatically sets compression headers and decompresses the response'
   spec.description = <<~DESC
-    #{'    '}
+    Faraday plugin to automatically set compression headers (GZip, Deflate, Brotli) and decompress the response.
   DESC
   spec.license = 'MIT'
 
