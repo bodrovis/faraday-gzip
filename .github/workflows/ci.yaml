@@ -15,7 +15,7 @@ jobs:
         ruby-version: 3.0
         bundler-cache: true
     - name: Run RuboCop
-      run: bundle exec rubocop --cache false
+      run: bundle exec rubocop
 
   rspec:
     runs-on: ubuntu-latest

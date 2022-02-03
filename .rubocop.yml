@@ -39,3 +39,6 @@ Packaging/RequireRelativeHardcodingLib:
   Exclude:
     - bin/**/*
     - spec/**/*
+  
+Lint/ScriptPermission:
+  Enabled: false
