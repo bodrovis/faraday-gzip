@@ -18,6 +18,9 @@ Gemspec/RequiredRubyVersion:
 Metrics/AbcSize:
   Max: 19
 
+Lint/ScriptPermission:
+  Enabled: true
+
 # Offense count: 1
 # Configuration parameters: CountComments, CountAsOne, ExcludedMethods, IgnoredMethods.
 Metrics/MethodLength:
