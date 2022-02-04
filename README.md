@@ -1,6 +1,6 @@
 # Faraday Gzip
 
-![CI](https://github.com/bodrovis/faraday-gzip/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/bodrovis/faraday-gzip/actions/workflows/ci.yaml/badge.svg)
 [![Gem](https://img.shields.io/gem/v/faraday-gzip.svg?style=flat-square)](https://rubygems.org/gems/faraday-gzip)
 [![License](https://img.shields.io/github/license/bodrovis/faraday-gzip.svg?style=flat-square)](LICENSE.md)
 
