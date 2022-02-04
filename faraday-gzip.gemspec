@@ -14,17 +14,16 @@ Gem::Specification.new do |spec|
   DESC
   spec.license = 'MIT'
 
-  github_uri = "https://github.com/lostisland/#{spec.name}"
+  github_uri = "https://github.com/bodrovis/#{spec.name}"
 
   spec.homepage = github_uri
 
   spec.metadata = {
     'bug_tracker_uri' => "#{github_uri}/issues",
-    'changelog_uri' => "#{github_uri}/blob/v#{spec.version}/CHANGELOG.md",
+    'changelog_uri' => "#{github_uri}/blob/master/CHANGELOG.md",
     'documentation_uri' => "http://www.rubydoc.info/gems/#{spec.name}/#{spec.version}",
     'homepage_uri' => spec.homepage,
     'source_code_uri' => github_uri,
-    'wiki_uri' => "#{github_uri}/wiki",
     'rubygems_mfa_required' => 'true'
   }
 
@@ -32,7 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.6', '< 4'
 
-  spec.add_runtime_dependency 'faraday', '~> 2.0'
+  spec.add_runtime_dependency 'faraday', '>= 1.0'
   spec.add_runtime_dependency 'zlib', '~> 2.1'
 
   spec.add_development_dependency 'bundler', '~> 2.0'

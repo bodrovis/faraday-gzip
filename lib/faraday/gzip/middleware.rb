@@ -8,6 +8,7 @@ module Faraday
     # "Accept-Encoding" header wasn't set in the request, this sets it to
     # "gzip,deflate" and appropriately handles the compressed response from the
     # server. This resembles what Ruby 1.9+ does internally in Net::HTTP#get.
+    # Based on https://github.com/lostisland/faraday_middleware/blob/main/lib/faraday_middleware/gzip.rb
 
     class Middleware < Faraday::Middleware
       def self.optional_dependency(lib = nil)

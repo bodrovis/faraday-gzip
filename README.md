@@ -1,10 +1,10 @@
 # Faraday Gzip
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/lostisland/faraday-gzip/ci)](https://github.com/lostisland/faraday-gzip/actions?query=branch%3Amain)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bodrovis/faraday-gzip/ci)](https://github.com/bodrovis/faraday-gzip/actions?query=branch%3Amain)
 [![Gem](https://img.shields.io/gem/v/faraday-gzip.svg?style=flat-square)](https://rubygems.org/gems/faraday-gzip)
-[![License](https://img.shields.io/github/license/lostisland/faraday-gzip.svg?style=flat-square)](LICENSE.md)
+[![License](https://img.shields.io/github/license/bodrovis/faraday-gzip.svg?style=flat-square)](LICENSE.md)
 
-The `Gzip` middleware adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If Brotli is added to the Gemfile, it will also add "br" to the header.
+The `Gzip` middleware adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If [Brotli](https://github.com/miyucy/brotli) is added to the Gemfile, it will also add "br" to the header.
 
 ## Installation
 
