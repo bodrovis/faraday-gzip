@@ -1,5 +1,4 @@
 The MIT License (MIT)
-<% require 'date' %>
 Copyright (c) 2022 Ilya Bodrov-Krukowski
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
