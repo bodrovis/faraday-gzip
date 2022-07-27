@@ -5,7 +5,7 @@ require_relative 'lib/faraday/gzip/version'
 Gem::Specification.new do |spec|
   spec.name = 'faraday-gzip'
   spec.version = Faraday::Gzip::VERSION
-  spec.authors = ['Ilya Bodrov-Krukowski']
+  spec.authors = ['Ilya Krukowski']
   spec.email = ['golosizpru@gmail.com']
 
   spec.summary = 'Automatically sets compression headers and decompresses the response'
@@ -39,8 +39,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'simplecov', '~> 0.21.0'
 
-  spec.add_development_dependency 'rubocop', '~> 1.25.0'
+  spec.add_development_dependency 'rubocop', '~> 1.32'
   spec.add_development_dependency 'rubocop-packaging', '~> 0.5.0'
   spec.add_development_dependency 'rubocop-performance', '~> 1.0'
-  spec.add_development_dependency 'rubocop-rspec', '~> 2.0'
+  spec.add_development_dependency 'rubocop-rspec', '~> 2.11'
 end
