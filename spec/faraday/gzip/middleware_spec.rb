@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Faraday::Gzip::Middleware do
-  require 'brotli'
+  require 'brotli' if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
 
   let(:headers) { {} }
   let(:middleware) do
@@ -24,7 +24,8 @@ RSpec.describe Faraday::Gzip::Middleware do
   context 'when request' do
     it 'sets the Accept-Encoding request header' do
       env = process('').env
-      expect(env[:request_headers][:accept_encoding]).to eq('gzip,deflate,br')
+      encodings = Faraday::Gzip::Middleware::BROTLI_SUPPORTED ? 'gzip,deflate,br' : 'gzip,deflate'
+      expect(env[:request_headers][:accept_encoding]).to eq(encodings)
     end
 
     it 'doesnt overwrite existing Accept-Encoding request header' do
@@ -38,6 +39,9 @@ RSpec.describe Faraday::Gzip::Middleware do
   context 'when response' do
     let(:uncompressed_body) do
       '<html><head><title>Rspec</title></head><body>Hello, spec!</body></html>'
+    end
+    let(:empty_body) do
+      ''
     end
     let(:gzipped_body) do
       io = StringIO.new
@@ -57,11 +61,11 @@ RSpec.describe Faraday::Gzip::Middleware do
       z.close
       compressed_body
     end
-    let(:brotlied_body) do
-      Brotli.deflate(uncompressed_body)
-    end
-    let(:empty_body) do
-      ''
+
+    if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
+      let(:brotlied_body) do
+        Brotli.deflate(uncompressed_body)
+      end
     end
 
     shared_examples 'compressed response' do
@@ -99,11 +103,13 @@ RSpec.describe Faraday::Gzip::Middleware do
       it_behaves_like 'compressed response'
     end
 
-    context 'when rotlied response' do
-      let(:body) { brotlied_body }
-      let(:headers) { { 'Content-Encoding' => 'br', 'Content-Length' => body.length } }
+    if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
+      context 'when brotlied response' do
+        let(:body) { brotlied_body }
+        let(:headers) { { 'Content-Encoding' => 'br', 'Content-Length' => body.length } }
 
-      it_behaves_like 'compressed response'
+        it_behaves_like 'compressed response'
+      end
     end
 
     context 'when empty response' do
