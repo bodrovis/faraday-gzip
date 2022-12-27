@@ -3,7 +3,11 @@
 ![CI](https://github.com/bodrovis/faraday-gzip/actions/workflows/ci.yaml/badge.svg)
 [![Gem](https://img.shields.io/gem/v/faraday-gzip.svg?style=flat-square)](https://rubygems.org/gems/faraday-gzip)
 
-The `Gzip` middleware adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If [Brotli](https://github.com/miyucy/brotli) is added to the Gemfile, it will also add "br" to the header.
+The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If [Brotli](https://github.com/miyucy/brotli) is added to the Gemfile, it will also add "br" to the header.
+
+## Prerequisites
+
+This gem is tested with Ruby 2.6+ and JRuby 9.3+. Faraday 1 and 2 is supported.
 
 ## Installation
 
@@ -28,10 +32,10 @@ gem install faraday-gzip
 ## Usage
 
 ```ruby
-require 'faraday/gzip'
+require 'faraday/gzip' # <=== add this line
 
 conn = Faraday.new(...) do |f|
-  f.request :gzip
+  f.request :gzip # <=== add this line
   #...
 end
 ```
