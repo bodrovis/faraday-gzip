@@ -42,3 +42,6 @@ Packaging/RequireRelativeHardcodingLib:
   
 Lint/ScriptPermission:
   Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
