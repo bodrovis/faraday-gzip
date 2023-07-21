@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0 (21-Jul-2023)
+
+* Use zlib version 3
+
 ## 1.0.0 (27-Dec-2022)
 
 * Added support for JRuby (thanks, @ashkulz)
