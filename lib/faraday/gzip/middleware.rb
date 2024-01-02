@@ -34,7 +34,7 @@ module Faraday
       def call(env)
         env[:request_headers][ACCEPT_ENCODING] ||= SUPPORTED_ENCODINGS
         @app.call(env).on_complete do |response_env|
-          if response_env[:body].nil? || response_env[:body].empty?
+          if empty_body?(response_env)
             reset_body(response_env) { |body| raw_body(body) }
           else
             case response_env[:response_headers][CONTENT_ENCODING]
@@ -53,11 +53,7 @@ module Faraday
         env[:body] = yield(env[:body])
         env[:response_headers].delete(CONTENT_ENCODING)
 
-        if env[:body].nil?
-          env[:response_headers][CONTENT_LENGTH] = 0
-        else
-          env[:response_headers][CONTENT_LENGTH] = env[:body].length
-        end
+        env[:response_headers][CONTENT_LENGTH] = env[:body].nil? ? 0 : env[:body].length
       end
 
       def uncompress_gzip(body)
@@ -86,6 +82,12 @@ module Faraday
 
       def raw_body(body)
         body
+      end
+
+      private
+
+      def empty_body?(response_env)
+        response_env[:body].nil? || response_env[:body].empty?
       end
     end
   end

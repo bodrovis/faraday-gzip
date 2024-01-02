@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (02-Jan-2024)
+
+* Handle cases when body is `nil` (thanks, @bendangelo)
+
 ## 2.0.0 (21-Jul-2023)
 
 * Use zlib version 3
