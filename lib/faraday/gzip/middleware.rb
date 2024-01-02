@@ -52,7 +52,12 @@ module Faraday
       def reset_body(env)
         env[:body] = yield(env[:body])
         env[:response_headers].delete(CONTENT_ENCODING)
-        env[:response_headers][CONTENT_LENGTH] = env[:body].length
+
+        if env[:body].nil?
+          env[:response_headers][CONTENT_LENGTH] = 0
+        else
+          env[:response_headers][CONTENT_LENGTH] = env[:body].length
+        end
       end
 
       def uncompress_gzip(body)

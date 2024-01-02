@@ -125,6 +125,19 @@ RSpec.describe Faraday::Gzip::Middleware do
       end
     end
 
+    context 'when nil response' do
+      let(:body) { nil }
+      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 } }
+
+      it 'sets the Content-Length' do
+        expect(process(body).headers['Content-Length']).to eq(0)
+      end
+
+      it 'removes the Content-Encoding' do
+        expect(process(body).headers['Content-Encoding']).to be_nil
+      end
+    end
+
     context 'when identity response' do
       let(:body) { uncompressed_body }
 
