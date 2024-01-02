@@ -34,7 +34,7 @@ module Faraday
       def call(env)
         env[:request_headers][ACCEPT_ENCODING] ||= SUPPORTED_ENCODINGS
         @app.call(env).on_complete do |response_env|
-          if response_env[:body].empty?
+          if response_env[:body].nil? || response_env[:body].empty?
             reset_body(response_env) { |body| raw_body(body) }
           else
             case response_env[:response_headers][CONTENT_ENCODING]
