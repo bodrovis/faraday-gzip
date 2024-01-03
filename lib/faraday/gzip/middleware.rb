@@ -2,15 +2,17 @@
 
 require 'zlib'
 
+# Middleware to automatically decompress response bodies. If the
+# "Accept-Encoding" header wasn't set in the request, this sets it to
+# "gzip,deflate" and appropriately handles the compressed response from the
+# server. This resembles what Ruby 1.9+ does internally in Net::HTTP#get.
+# Based on https://github.com/lostisland/faraday_middleware/blob/main/lib/faraday_middleware/gzip.rb
 module Faraday
+  # Main module
   module Gzip
-    # Middleware to automatically decompress response bodies. If the
-    # "Accept-Encoding" header wasn't set in the request, this sets it to
-    # "gzip,deflate" and appropriately handles the compressed response from the
-    # server. This resembles what Ruby 1.9+ does internally in Net::HTTP#get.
-    # Based on https://github.com/lostisland/faraday_middleware/blob/main/lib/faraday_middleware/gzip.rb
-
+    # Faraday middleware for decompression
     class Middleware < Faraday::Middleware
+      # System method required by Faraday
       def self.optional_dependency(lib = nil)
         lib ? require(lib) : yield
         true
@@ -20,6 +22,8 @@ module Faraday
 
       BROTLI_SUPPORTED = optional_dependency 'brotli'
 
+      # Returns supported encodings, adds brotli if the corresponding
+      # dependency is present
       def self.supported_encodings
         encodings = %w[gzip deflate]
         encodings << 'br' if BROTLI_SUPPORTED
@@ -31,37 +35,49 @@ module Faraday
       CONTENT_LENGTH = 'Content-Length'
       SUPPORTED_ENCODINGS = supported_encodings.join(',').freeze
 
+      # Main method to process the response
       def call(env)
         env[:request_headers][ACCEPT_ENCODING] ||= SUPPORTED_ENCODINGS
+
         @app.call(env).on_complete do |response_env|
-          if empty_body?(response_env)
-            reset_body(response_env) { |body| raw_body(body) }
-          else
-            case response_env[:response_headers][CONTENT_ENCODING]
-            when 'gzip'
-              reset_body(response_env) { |body| uncompress_gzip(body) }
-            when 'deflate'
-              reset_body(response_env) { |body| inflate(body) }
-            when 'br'
-              reset_body(response_env) { |body| brotli_inflate(body) }
-            end
+          reset_body(response_env, find_processor(response_env))
+        end
+      end
+
+      # Finds a proper processor
+      def find_processor(response_env)
+        if empty_body?(response_env)
+          ->(body) { raw_body(body) }
+        else
+          case response_env[:response_headers][CONTENT_ENCODING]
+          when 'gzip'
+            ->(body) { uncompress_gzip(body) }
+          when 'deflate'
+            ->(body) { inflate(body) }
+          when 'br'
+            ->(body) { brotli_inflate(body) }
           end
         end
       end
 
-      def reset_body(env)
-        env[:body] = yield(env[:body])
+      # Calls the proper processor to decompress body
+      def reset_body(env, processor)
+        return unless processor
+
+        env[:body] = processor.call(env[:body])
         env[:response_headers].delete(CONTENT_ENCODING)
 
         env[:response_headers][CONTENT_LENGTH] = env[:body].nil? ? 0 : env[:body].length
       end
 
+      # Process gzip
       def uncompress_gzip(body)
         io = StringIO.new(body)
         gzip_reader = Zlib::GzipReader.new(io, encoding: 'ASCII-8BIT')
         gzip_reader.read
       end
 
+      # Process deflate
       def inflate(body)
         # Inflate as a DEFLATE (RFC 1950+RFC 1951) stream
         Zlib::Inflate.inflate(body)
@@ -76,10 +92,12 @@ module Faraday
         end
       end
 
+      # Process brotli
       def brotli_inflate(body)
         Brotli.inflate(body)
       end
 
+      # Do not process anything, leave body as is
       def raw_body(body)
         body
       end

@@ -9,9 +9,6 @@
 # Offense count: 1
 # Configuration parameters: Include.
 # Include: **/*.gemspec
-Gemspec/RequiredRubyVersion:
-  Exclude:
-    - 'faraday-gzip.gemspec'
 
 # Offense count: 1
 # Configuration parameters: IgnoredMethods, CountRepeatedAttributes.
@@ -27,9 +24,3 @@ Metrics/MethodLength:
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:
   Max: 9
-
-# Offense count: 1
-# Configuration parameters: AllowedConstants.
-Style/Documentation:
-  Exclude:
-    - 'lib/faraday/gzip/middleware.rb'

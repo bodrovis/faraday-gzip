@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 require 'faraday'
+require 'simplecov'
+
+SimpleCov.start do
+  add_filter 'spec/'
+  add_filter '.github/'
+end
+
 require_relative '../lib/faraday/gzip'
 
 RSpec.configure do |config|

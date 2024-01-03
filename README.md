@@ -2,6 +2,7 @@
 
 ![CI](https://github.com/bodrovis/faraday-gzip/actions/workflows/ci.yaml/badge.svg)
 [![Gem](https://img.shields.io/gem/v/faraday-gzip.svg?style=flat-square)](https://rubygems.org/gems/faraday-gzip)
+![Gem Total Downloads](https://img.shields.io/gem/dt/faraday-gzip)
 
 The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If [Brotli](https://github.com/miyucy/brotli) is added to the Gemfile, it will also add "br" to the header.
 
