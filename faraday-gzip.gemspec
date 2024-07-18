@@ -34,9 +34,9 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.6', '< 4'
 
-  spec.add_runtime_dependency 'faraday', '>= 1.0'
+  spec.add_dependency 'faraday', '>= 1.0'
   # disable on JRuby till https://github.com/ruby/zlib/issues/38 is fixed
-  spec.add_runtime_dependency 'zlib', '~> 3.0' unless is_java
+  spec.add_dependency 'zlib', '~> 3.0' unless is_java
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'rake', '~> 13.0'
