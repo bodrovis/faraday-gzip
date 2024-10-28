@@ -2,16 +2,14 @@
 
 require_relative 'lib/faraday/gzip/version'
 
-def java?
-  RUBY_PLATFORM == 'java'
-end
+java_platform = RUBY_PLATFORM == 'java'
 
 Gem::Specification.new do |spec|
   spec.name = 'faraday-gzip'
   spec.version = Faraday::Gzip::VERSION
   spec.authors = ['Ilya Krukowski']
   spec.email = ['golosizpru@gmail.com']
-  spec.platform = 'java' if java?
+  spec.platform = 'java' if java_platform
 
   spec.summary = 'Automatically sets compression headers and decompresses the response'
   spec.description = <<~DESC
@@ -38,7 +36,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'faraday', '>= 1.0'
   # disable on JRuby till https://github.com/ruby/zlib/issues/38 is fixed
-  spec.add_dependency 'zlib', '~> 3.0' unless java?
+  spec.add_dependency 'zlib', '~> 3.0' unless java_platform
 
   spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'rake', '~> 13.0'

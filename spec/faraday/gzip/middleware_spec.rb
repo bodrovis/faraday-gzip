@@ -9,7 +9,6 @@ RSpec.describe Faraday::Gzip::Middleware do
 
   let(:headers) { {} }
 
-
   def process(body, content_type = nil, options = {})
     env = {
       body: body, request: options,

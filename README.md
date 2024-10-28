@@ -43,14 +43,12 @@ end
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies.
-
-Then, run `bin/test` to run the tests.
-
-To install this gem onto your local machine, run `rake build`.
-
-To release a new version, make a commit with a message such as "Bumped to 0.0.2" and then run `rake release`.
-See how it works [here](https://bundler.io/guides/creating_gem.html#releasing-the-gem).
+* Check out repo
+* `bundle`
+* Implement your feature
+* Write tests, use `rspec .` to run the tests
+* `rake build` to build locally
+* Create a new PR
 
 ## Contributing
 

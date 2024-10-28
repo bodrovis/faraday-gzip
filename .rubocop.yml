@@ -1,14 +1,7 @@
-inherit_from: .rubocop_todo.yml
-
 require:
   - rubocop-packaging
   - rubocop-performance
   - rubocop-rspec
-
-inherit_mode:
-  merge:
-    - Include
-    - Exclude
 
 AllCops:
   DisplayCopNames: true
@@ -21,15 +14,9 @@ Metrics/BlockLength:
   Exclude:
     - spec/**/*.rb
 
-Layout/EmptyLinesAroundAttributeAccessor: # (0.83)
-  Enabled: true
-
 Layout/LineLength:
   Exclude:
     - spec/**/*.rb
-
-Layout/SpaceAroundMethodCallOperator:
-  Enabled: true
 
 Style/Documentation:
   Exclude:
@@ -39,9 +26,9 @@ Packaging/RequireRelativeHardcodingLib:
   Exclude:
     - bin/**/*
     - spec/**/*
-  
-Lint/ScriptPermission:
-  Enabled: false
 
 Gemspec/DevelopmentDependencies:
   EnforcedStyle: gemspec
+
+RSpec/MultipleMemoizedHelpers:
+  Max: 9
