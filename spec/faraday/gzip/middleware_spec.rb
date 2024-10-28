@@ -3,12 +3,12 @@
 RSpec.describe Faraday::Gzip::Middleware do
   require 'brotli' if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
 
-  let(:headers) { {} }
-  let(:middleware) do
-    described_class.new(lambda { |env|
-      Faraday::Response.new(env)
-    })
+  subject(:middleware) do
+    described_class.new(->(env) { Faraday::Response.new(env) })
   end
+
+  let(:headers) { {} }
+
 
   def process(body, content_type = nil, options = {})
     env = {
@@ -40,9 +40,7 @@ RSpec.describe Faraday::Gzip::Middleware do
     let(:uncompressed_body) do
       '<html><head><title>Rspec</title></head><body>Hello, spec!</body></html>'
     end
-    let(:empty_body) do
-      ''
-    end
+    let(:empty_body) { '' }
     let(:gzipped_body) do
       io = StringIO.new
       gz = Zlib::GzipWriter.new(io)
@@ -144,6 +142,39 @@ RSpec.describe Faraday::Gzip::Middleware do
       it 'does not modify the body' do
         expect(process(body).body).to eq(uncompressed_body)
       end
+    end
+
+    context 'when unsupported encoding response' do
+      let(:body) { 'unsupported' }
+      let(:headers) { { 'Content-Encoding' => 'unsupported' } }
+
+      it 'does not modify the body' do
+        expect(process(body).body).to eq(body)
+      end
+
+      it 'preserves the Content-Encoding header' do
+        expect(process(body).headers['Content-Encoding']).to eq('unsupported')
+      end
+    end
+
+    context 'when no Content-Encoding header' do
+      let(:body) { uncompressed_body }
+      let(:headers) { {} }
+
+      it 'does not modify the body' do
+        expect(process(body).body).to eq(uncompressed_body)
+      end
+
+      it 'does not add a Content-Encoding header' do
+        expect(process(body).headers['Content-Encoding']).to be_nil
+      end
+    end
+
+    context 'when Content-Length is a string' do
+      let(:body) { gzipped_body }
+      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => body.length.to_s } }
+
+      it_behaves_like 'compressed response'
     end
   end
 end

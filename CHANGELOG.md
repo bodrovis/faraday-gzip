@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+* **Breaking change**: Drop support for Ruby 2.6, require 2.7+
+* Various code tweaks
+* Remove JRuby 9.3 from CI matrix
+
 ## 2.0.1 (02-Jan-2024)
 
 * Handle cases when body is `nil` (thanks, @bendangelo)

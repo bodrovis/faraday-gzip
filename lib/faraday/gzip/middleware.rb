@@ -49,20 +49,13 @@ module Faraday
         if empty_body?(response_env)
           ->(body) { raw_body(body) }
         else
-          case response_env[:response_headers][CONTENT_ENCODING]
-          when 'gzip'
-            ->(body) { uncompress_gzip(body) }
-          when 'deflate'
-            ->(body) { inflate(body) }
-          when 'br'
-            ->(body) { brotli_inflate(body) }
-          end
+          processors[response_env[:response_headers][CONTENT_ENCODING]]
         end
       end
 
       # Calls the proper processor to decompress body
       def reset_body(env, processor)
-        return unless processor
+        return if processor.nil?
 
         env[:body] = processor.call(env[:body])
         env[:response_headers].delete(CONTENT_ENCODING)
@@ -106,6 +99,15 @@ module Faraday
 
       def empty_body?(response_env)
         response_env[:body].nil? || response_env[:body].empty?
+      end
+
+      # Method providing the processors
+      def processors
+        {
+          'gzip' => ->(body) { uncompress_gzip(body) },
+          'deflate' => ->(body) { inflate(body) },
+          'br' => ->(body) { brotli_inflate(body) }
+        }
       end
     end
   end
