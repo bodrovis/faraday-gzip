@@ -4,11 +4,11 @@
 [![Gem](https://img.shields.io/gem/v/faraday-gzip.svg?style=flat-square)](https://rubygems.org/gems/faraday-gzip)
 ![Gem Total Downloads](https://img.shields.io/gem/dt/faraday-gzip)
 
-The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header wasn't set in the request, this sets it to "gzip,deflate" and appropriately handles the compressed response from the server. This resembles what Ruby does internally in Net::HTTP#get. If [Brotli](https://github.com/miyucy/brotli) is added to the Gemfile, it will also add "br" to the header.
+The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header isn't set in the request, it defaults to `gzip,deflate` and appropriately handles the server's compressed response. This functionality resembles what Ruby does internally in `Net::HTTP#get`. If [Brotli](https://github.com/miyucy/brotli) is included in your Gemfile, the middleware also adds `br` to the header for Brotli support.
 
 ## Prerequisites
 
-This gem is tested with Ruby 2.6+ and JRuby 9.3+. Faraday 1 and 2 is supported.
+This gem is tested with Ruby 2.6+ and JRuby 9.3+. It supports both Faraday 1 and 2.
 
 ## Installation
 
@@ -20,35 +20,39 @@ gem 'faraday-gzip'
 
 And then execute:
 
-```shell
+```
 bundle install
 ```
 
 Or install it yourself as:
 
-```shell
+```
 gem install faraday-gzip
 ```
 
 ## Usage
 
+To enable the middleware in your Faraday connection, add it as shown below:
+
 ```ruby
-require 'faraday/gzip' # <=== add this line
+require 'faraday/gzip' # <=== Add this line
 
 conn = Faraday.new(...) do |f|
-  f.request :gzip # <=== add this line
-  #...
+  f.request :gzip # <=== Add this line
+  # Additional configuration...
 end
 ```
 
 ## Development
 
-* Check out repo
-* `bundle`
+To contribute or make changes:
+
+* Clone the repo
+* Run `bundle` to install dependencies
 * Implement your feature
-* Write tests, use `rspec .` to run the tests
-* `rake build` to build locally
-* Create a new PR
+* Write and run tests using `rspec .`
+* Use rake build to build the gem locally if needed
+* Create a new PR with your changes
 
 ## Contributing
 
@@ -56,4 +60,4 @@ Bug reports and pull requests are welcome on GitHub.
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+This gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
