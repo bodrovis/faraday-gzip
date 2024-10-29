@@ -8,7 +8,7 @@ The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` h
 
 ## Prerequisites
 
-This gem is tested with Ruby 2.6+ and JRuby 9.3+. It supports both Faraday 1 and 2.
+This gem is tested with Ruby 2.7+ and JRuby 9.4+. It supports both Faraday 1 and 2.
 
 ## Installation
 
