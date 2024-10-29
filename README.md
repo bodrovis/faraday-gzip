@@ -15,7 +15,7 @@ This gem is tested with Ruby 2.7+ and JRuby 9.4+. It supports both Faraday 1 and
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'faraday-gzip'
+gem 'faraday-gzip', '~> 2'
 ```
 
 And then execute:
