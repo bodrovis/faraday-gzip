@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 3.0.0 (29-Oct-2024)
 
-* **Breaking change**: Drop support for Ruby 2.6, require 2.7+
+* **Breaking change**: Drop support for Ruby 2, require 3.0+
+* **Breaking change**: Drop support for Faraday v1. If you need to support Faraday v1, stay on [faraday-gzip version 2](https://github.com/bodrovis/faraday-gzip/tree/v2).
 * Various code tweaks
 * Remove JRuby 9.3 from CI matrix
 
