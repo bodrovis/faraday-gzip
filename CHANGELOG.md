@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1 (01-Nov-2024)
+
+* Minor fix in gemspec
+
 ## 3.0.0 (29-Oct-2024)
 
 * **Breaking change**: Drop support for Ruby 2, require 3.0+

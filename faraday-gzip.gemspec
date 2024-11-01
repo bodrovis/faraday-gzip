@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir['lib/**/*', 'spec/**/*', 'README.md', 'LICENSE.md', 'CHANGELOG.md']
 
-  spec.required_ruby_version = '>= 3.0', '< 4'
+  spec.required_ruby_version = '>= 3.0'
 
   spec.add_dependency 'faraday', '>= 2.0', '< 3'
   # disable on JRuby till https://github.com/ruby/zlib/issues/38 is fixed
