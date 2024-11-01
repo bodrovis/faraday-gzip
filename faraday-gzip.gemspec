@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
     'rubygems_mfa_required' => 'true'
   }
 
-  spec.files = Dir['lib/**/*', 'spec/**/*', 'README.md', 'LICENSE.md', 'CHANGELOG.md']
+  spec.files = Dir['lib/**/*', 'README.md', 'LICENSE.md', 'CHANGELOG.md']
 
   spec.required_ruby_version = '>= 3.0'
 

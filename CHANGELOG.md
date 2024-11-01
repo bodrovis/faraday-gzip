@@ -1,8 +1,8 @@
 # Changelog
 
-## 3.0.1 (01-Nov-2024)
+## 3.0.1 / 3.0.2 (01-Nov-2024)
 
-* Minor fix in gemspec
+* Minor fixes in gemspec
 
 ## 3.0.0 (29-Oct-2024)
 
