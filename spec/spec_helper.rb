@@ -4,8 +4,7 @@ require 'faraday'
 require 'simplecov'
 
 SimpleCov.start do
-  add_filter 'spec/'
-  add_filter '.github/'
+  add_filter %w[spec/ .github/]
 end
 
 require_relative '../lib/faraday/gzip'
@@ -22,4 +21,5 @@ RSpec.configure do |config|
   end
 
   config.order = :random
+  Kernel.srand config.seed
 end
