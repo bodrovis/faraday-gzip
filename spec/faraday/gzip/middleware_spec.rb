@@ -70,8 +70,8 @@ RSpec.describe Faraday::Gzip::Middleware do
         expect(process(body).body).to eq(uncompressed_body)
       end
 
-      it 'sets the Content-Length' do
-        expect(process(body).headers['Content-Length']).to eq(uncompressed_body.length)
+      it 'sets the correct Content-Length' do
+        expect(process(body).headers['Content-Length']).to eq(uncompressed_body.bytesize)
       end
 
       it 'removes the Content-Encoding' do

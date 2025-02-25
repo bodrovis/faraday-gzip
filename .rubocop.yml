@@ -1,5 +1,4 @@
-require:
-  - rubocop-packaging
+plugins:
   - rubocop-performance
   - rubocop-rspec
 
@@ -21,11 +20,6 @@ Layout/LineLength:
 Style/Documentation:
   Exclude:
     - 'spec/**/*'
-
-Packaging/RequireRelativeHardcodingLib:
-  Exclude:
-    - bin/**/*
-    - spec/**/*
 
 Gemspec/DevelopmentDependencies:
   EnforcedStyle: gemspec

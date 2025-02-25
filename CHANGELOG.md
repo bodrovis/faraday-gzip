@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.3 (25-Feb-2025)
+
+* Minor code fixes, make some methods more solid
+
 ## 3.0.1 / 3.0.2 (01-Nov-2024)
 
 * Minor fixes in gemspec

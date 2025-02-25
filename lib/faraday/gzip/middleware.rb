@@ -67,7 +67,11 @@ module Faraday
       def uncompress_gzip(body)
         io = StringIO.new(body)
         gzip_reader = Zlib::GzipReader.new(io, encoding: 'ASCII-8BIT')
-        gzip_reader.read
+        begin
+          gzip_reader.read
+        ensure
+          gzip_reader.close
+        end
       end
 
       # Process deflate
@@ -103,7 +107,7 @@ module Faraday
 
       # Method providing the processors
       def processors
-        {
+        @processors ||= {
           'gzip' => ->(body) { uncompress_gzip(body) },
           'deflate' => ->(body) { inflate(body) },
           'br' => ->(body) { brotli_inflate(body) }
