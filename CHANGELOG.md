@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.4 (06-Apr-2025)
+
+* Require StringIO that might not always be readily available
+
 ## 3.0.3 (25-Feb-2025)
 
 * Minor code fixes, make some methods more solid

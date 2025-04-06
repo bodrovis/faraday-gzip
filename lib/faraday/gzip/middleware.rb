@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'zlib'
+require 'stringio'
 
 # Middleware to automatically decompress response bodies. If the
 # "Accept-Encoding" header wasn't set in the request, this sets it to
