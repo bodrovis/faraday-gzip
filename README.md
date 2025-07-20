@@ -10,7 +10,7 @@ The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` h
 
 ## Prerequisites
 
-* faraday-gzip v3 supports only Faraday v2 and is tested with Ruby 3.0+ and JRuby 9.4
+* faraday-gzip v3 supports only Faraday v2 and is tested with Ruby 3.0+ and JRuby 9.4+
 * [faraday-gzip v2](https://github.com/bodrovis/faraday-gzip/tree/v2) supports Faraday v1 and v2 and is tested with Ruby 2.7+ and JRuby 9.4.
 
 ## Installation
