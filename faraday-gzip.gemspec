@@ -37,7 +37,6 @@ Gem::Specification.new do |spec|
   # disable on JRuby till https://github.com/ruby/zlib/issues/38 is fixed
   spec.add_dependency 'zlib', '~> 3.0' unless java_platform
 
-  spec.add_development_dependency 'bundler', '~> 4.0'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'simplecov', '~> 0.22'
