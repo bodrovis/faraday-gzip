@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0
+
+* Handle more edge cases, update tests
+
 ## 3.0.4 (06-Apr-2025)
 
 * Require StringIO that might not always be readily available

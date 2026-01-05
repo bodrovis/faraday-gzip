@@ -13,6 +13,11 @@ module Faraday
   module Gzip
     # Faraday middleware for decompression
     class Middleware < Faraday::Middleware
+      ACCEPT_ENCODING  = 'Accept-Encoding'
+      CONTENT_ENCODING = 'Content-Encoding'
+      CONTENT_LENGTH   = 'Content-Length'
+      IDENTITY         = 'identity'
+
       # System method required by Faraday
       def self.optional_dependency(lib = nil)
         lib ? require(lib) : yield
@@ -31,9 +36,6 @@ module Faraday
         encodings
       end
 
-      ACCEPT_ENCODING = 'Accept-Encoding'
-      CONTENT_ENCODING = 'Content-Encoding'
-      CONTENT_LENGTH = 'Content-Length'
       SUPPORTED_ENCODINGS = supported_encodings.join(',').freeze
 
       # Main method to process the response
@@ -47,21 +49,40 @@ module Faraday
 
       # Finds a proper processor
       def find_processor(response_env)
-        if empty_body?(response_env)
-          ->(body) { raw_body(body) }
-        else
-          processors[response_env[:response_headers][CONTENT_ENCODING]]
-        end
+        body = response_env[:body]
+
+        encodings = parse_content_encoding(
+          response_env[:response_headers][CONTENT_ENCODING]
+        )
+        return nil if encodings.empty? || encodings.include?(IDENTITY)
+
+        # If body is nil/empty, we still want to normalize headers:
+        # Content-Encoding is meaningless without an encoded body.
+        return ->(b) { b } if body_nil_or_empty?(body)
+
+        chain = processor_chain(encodings)
+        return nil if chain.empty?
+
+        ->(b) { chain.reduce(b) { |acc, fn| fn.call(acc) } }
       end
 
       # Calls the proper processor to decompress body
       def reset_body(env, processor)
         return if processor.nil?
 
-        env[:body] = processor.call(env[:body])
-        env[:response_headers].delete(CONTENT_ENCODING)
+        body    = env[:body]
+        headers = env[:response_headers]
 
-        env[:response_headers][CONTENT_LENGTH] = env[:body].nil? ? 0 : env[:body].length
+        # Don't touch streaming / IO-like bodies.
+        return unless body.is_a?(String) || body_nil_or_empty?(body)
+
+        if body.is_a?(String)
+          env[:body] = processor.call(body)
+          headers[CONTENT_LENGTH] = env[:body].bytesize
+        end
+
+        # Normalize encoding header even for nil/empty body.
+        headers.delete(CONTENT_ENCODING)
       end
 
       # Process gzip
@@ -95,23 +116,38 @@ module Faraday
         Brotli.inflate(body)
       end
 
-      # Do not process anything, leave body as is
-      def raw_body(body)
-        body
-      end
-
       private
 
-      def empty_body?(response_env)
-        response_env[:body].nil? || response_env[:body].empty?
+      def body_nil_or_empty?(body)
+        return true if body.nil?
+        return body.empty? if body.respond_to?(:empty?)
+        # rubocop:disable Style/ZeroLengthPredicate
+        return body.size.zero? if body.respond_to?(:size)
+        # rubocop:enable Style/ZeroLengthPredicate
+
+        false
       end
 
-      # Method providing the processors
+      def parse_content_encoding(value)
+        return [] if value.nil?
+
+        value.to_s
+             .split(',')
+             .map { |v| v.strip.downcase }
+             .reject(&:empty?)
+      end
+
+      # Decode in reverse order of application:
+      # "gzip, br"  => br -> gzip
+      def processor_chain(encodings)
+        encodings.reverse.filter_map { |enc| processors[enc] }
+      end
+
       def processors
         @processors ||= {
           'gzip' => ->(body) { uncompress_gzip(body) },
           'deflate' => ->(body) { inflate(body) },
-          'br' => ->(body) { brotli_inflate(body) }
+          'br' => (BROTLI_SUPPORTED ? ->(body) { brotli_inflate(body) } : nil)
         }
       end
     end

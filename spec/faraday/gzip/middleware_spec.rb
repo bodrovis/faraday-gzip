@@ -1,179 +1,235 @@
 # frozen_string_literal: true
 
 RSpec.describe Faraday::Gzip::Middleware do
-  require 'brotli' if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
+  require 'brotli' if described_class::BROTLI_SUPPORTED
 
   subject(:middleware) do
     described_class.new(->(env) { Faraday::Response.new(env) })
   end
 
-  let(:headers) { {} }
-
-  def process(body, content_type = nil, options = {})
-    env = {
-      body: body, request: options,
-      request_headers: Faraday::Utils::Headers.new,
-      response_headers: Faraday::Utils::Headers.new(headers)
-    }
-    env[:response_headers]['content-type'] = content_type if content_type
-    yield(env) if block_given?
-    middleware.call(env)
+  let(:uncompressed_body) do
+    '<html><head><title>Rspec</title></head><body>Hello, spec!</body></html>'
   end
 
-  context 'when request' do
-    it 'sets the Accept-Encoding request header' do
-      env = process('').env
-      encodings = Faraday::Gzip::Middleware::BROTLI_SUPPORTED ? 'gzip,deflate,br' : 'gzip,deflate'
-      expect(env[:request_headers][:accept_encoding]).to eq(encodings)
+  describe 'request headers' do
+    it 'sets Accept-Encoding when missing' do
+      res = process_through_middleware(middleware, body: '', headers: {})
+      encodings = described_class::BROTLI_SUPPORTED ? 'gzip,deflate,br' : 'gzip,deflate'
+      expect(res.env[:request_headers][:accept_encoding]).to eq(encodings)
     end
 
-    it 'doesnt overwrite existing Accept-Encoding request header' do
-      env = process('') do |e|
-        e[:request_headers][:accept_encoding] = 'zopfli'
-      end.env
-      expect(env[:request_headers][:accept_encoding]).to eq('zopfli')
+    it 'does not overwrite existing Accept-Encoding' do
+      res = process_through_middleware(middleware, body: '', headers: {}) do |env|
+        env[:request_headers][:accept_encoding] = 'zopfli'
+      end
+
+      expect(res.env[:request_headers][:accept_encoding]).to eq('zopfli')
     end
   end
 
-  context 'when response' do
-    let(:uncompressed_body) do
-      '<html><head><title>Rspec</title></head><body>Hello, spec!</body></html>'
-    end
-    let(:empty_body) { '' }
-    let(:gzipped_body) do
-      io = StringIO.new
-      gz = Zlib::GzipWriter.new(io)
-      gz.write(uncompressed_body)
-      gz.close
-      res = io.string
-      res.force_encoding('BINARY')
-      res
-    end
-    let(:deflated_body) do
-      Zlib::Deflate.deflate(uncompressed_body)
-    end
-    let(:raw_deflated_body) do
-      z = Zlib::Deflate.new(Zlib::DEFAULT_COMPRESSION, -Zlib::MAX_WBITS)
-      compressed_body = z.deflate(uncompressed_body, Zlib::FINISH)
-      z.close
-      compressed_body
-    end
+  describe 'response decoding' do
+    shared_examples 'decoded response' do
+      it 'decodes body' do
+        expect(response.body).to eq(uncompressed_body)
+      end
 
-    if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
-      let(:brotlied_body) do
-        Brotli.deflate(uncompressed_body)
+      it 'sets Content-Length to decoded bytesize' do
+        expect(response.headers['Content-Length']).to eq(uncompressed_body.bytesize)
+      end
+
+      it 'removes Content-Encoding' do
+        expect(response.headers['Content-Encoding']).to be_nil
       end
     end
 
-    shared_examples 'compressed response' do
-      it 'uncompresses the body' do
-        expect(process(body).body).to eq(uncompressed_body)
+    context 'when gzip' do
+      let(:compressed) { gzip_deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => compressed.bytesize }
+        )
       end
 
-      it 'sets the correct Content-Length' do
-        expect(process(body).headers['Content-Length']).to eq(uncompressed_body.bytesize)
-      end
-
-      it 'removes the Content-Encoding' do
-        expect(process(body).headers['Content-Encoding']).to be_nil
-      end
+      it_behaves_like 'decoded response'
     end
 
-    context 'when gzipped response' do
-      let(:body) { gzipped_body }
-      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => body.length } }
+    context 'when deflate (zlib wrapper)' do
+      let(:compressed) { zlib_deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'deflate', 'Content-Length' => compressed.bytesize }
+        )
+      end
 
-      it_behaves_like 'compressed response'
+      it_behaves_like 'decoded response'
     end
 
-    context 'when deflated response' do
-      let(:body) { deflated_body }
-      let(:headers) { { 'Content-Encoding' => 'deflate', 'Content-Length' => body.length } }
+    context 'when deflate (raw stream)' do
+      let(:compressed) { raw_deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'deflate', 'Content-Length' => compressed.bytesize }
+        )
+      end
 
-      it_behaves_like 'compressed response'
+      it_behaves_like 'decoded response'
     end
 
-    context 'when raw deflated response' do
-      let(:body) { raw_deflated_body }
-      let(:headers) { { 'Content-Encoding' => 'deflate', 'Content-Length' => body.length } }
+    context 'when brotli', if: described_class::BROTLI_SUPPORTED do
+      let(:compressed) { Brotli.deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'br', 'Content-Length' => compressed.bytesize }
+        )
+      end
 
-      it_behaves_like 'compressed response'
+      it_behaves_like 'decoded response'
     end
 
-    if Faraday::Gzip::Middleware::BROTLI_SUPPORTED
-      context 'when brotlied response' do
-        let(:body) { brotlied_body }
-        let(:headers) { { 'Content-Encoding' => 'br', 'Content-Length' => body.length } }
-
-        it_behaves_like 'compressed response'
+    context 'when multiple encodings', if: described_class::BROTLI_SUPPORTED do
+      let(:compressed) { Brotli.deflate(gzip_deflate(uncompressed_body)) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'gzip, br', 'Content-Length' => compressed.bytesize }
+        )
       end
+
+      it_behaves_like 'decoded response'
     end
 
-    context 'when empty response' do
-      let(:body) { empty_body }
-      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => body.length } }
-
-      it 'sets the Content-Length' do
-        expect(process(body).headers['Content-Length']).to eq(empty_body.length)
+    context 'with Content-Encoding normalization (spaces/case)' do
+      let(:compressed) { gzip_deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => ' GZip ', 'Content-Length' => compressed.bytesize }
+        )
       end
 
-      it 'removes the Content-Encoding' do
-        expect(process(body).headers['Content-Encoding']).to be_nil
-      end
+      it_behaves_like 'decoded response'
     end
 
-    context 'when nil response' do
-      let(:body) { nil }
-      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 } }
-
-      it 'sets the Content-Length' do
-        expect(process(body).headers['Content-Length']).to eq(0)
+    context 'when Content-Length provided as string' do
+      let(:compressed) { gzip_deflate(uncompressed_body) }
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => compressed.bytesize.to_s }
+        )
       end
 
-      it 'removes the Content-Encoding' do
-        expect(process(body).headers['Content-Encoding']).to be_nil
-      end
+      it_behaves_like 'decoded response'
+    end
+  end
+
+  describe 'edge cases' do
+    it 'removes Content-Encoding for empty body and preserves length' do
+      res = process_through_middleware(
+        middleware,
+        body: '',
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 }
+      )
+
+      expect(res.headers['Content-Length']).to eq(0)
+      expect(res.headers['Content-Encoding']).to be_nil
     end
 
-    context 'when identity response' do
-      let(:body) { uncompressed_body }
+    it 'removes Content-Encoding for nil body and preserves length' do
+      res = process_through_middleware(
+        middleware,
+        body: nil,
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 }
+      )
 
-      it 'does not modify the body' do
-        expect(process(body).body).to eq(uncompressed_body)
-      end
+      expect(res.headers['Content-Length']).to eq(0)
+      expect(res.headers['Content-Encoding']).to be_nil
     end
 
-    context 'when unsupported encoding response' do
-      let(:body) { 'unsupported' }
-      let(:headers) { { 'Content-Encoding' => 'unsupported' } }
+    it 'does not modify identity responses' do
+      res = process_through_middleware(
+        middleware,
+        body: uncompressed_body,
+        headers: { 'Content-Encoding' => 'identity', 'Content-Length' => uncompressed_body.bytesize }
+      )
 
-      it 'does not modify the body' do
-        expect(process(body).body).to eq(body)
-      end
-
-      it 'preserves the Content-Encoding header' do
-        expect(process(body).headers['Content-Encoding']).to eq('unsupported')
-      end
+      expect(res.body).to eq(uncompressed_body)
+      expect(res.headers['Content-Encoding']).to eq('identity')
     end
 
-    context 'when no Content-Encoding header' do
-      let(:body) { uncompressed_body }
-      let(:headers) { {} }
+    it 'does not modify unsupported encodings' do
+      res = process_through_middleware(
+        middleware,
+        body: 'unsupported',
+        headers: { 'Content-Encoding' => 'unsupported' }
+      )
 
-      it 'does not modify the body' do
-        expect(process(body).body).to eq(uncompressed_body)
-      end
-
-      it 'does not add a Content-Encoding header' do
-        expect(process(body).headers['Content-Encoding']).to be_nil
-      end
+      expect(res.body).to eq('unsupported')
+      expect(res.headers['Content-Encoding']).to eq('unsupported')
     end
 
-    context 'when Content-Length is a string' do
-      let(:body) { gzipped_body }
-      let(:headers) { { 'Content-Encoding' => 'gzip', 'Content-Length' => body.length.to_s } }
+    it 'does nothing when Content-Encoding is missing' do
+      res = process_through_middleware(middleware, body: uncompressed_body, headers: {})
 
-      it_behaves_like 'compressed response'
+      expect(res.body).to eq(uncompressed_body)
+      expect(res.headers['Content-Encoding']).to be_nil
+    end
+
+    it 'does not touch non-string bodies (stream-like)' do
+      stream = StringIO.new(gzip_deflate(uncompressed_body))
+
+      res = process_through_middleware(
+        middleware,
+        body: stream,
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 123 }
+      )
+
+      expect(res.body).to eq(stream)
+      expect(res.headers['Content-Encoding']).to eq('gzip')
+    end
+
+    it 'treats weird bodies without empty?/size as non-empty and does not touch them' do
+      weird = Object.new
+
+      res = process_through_middleware(
+        middleware,
+        body: weird,
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 123 }
+      )
+
+      expect(res.body).to eq(weird)
+      expect(res.headers['Content-Encoding']).to eq('gzip')
+    end
+  end
+
+  describe '.optional_dependency' do
+    it 'returns false when require raises LoadError' do
+      allow(described_class).to receive(:require).with('nope_nope_nope').and_raise(LoadError)
+      expect(described_class.optional_dependency('nope_nope_nope')).to be(false)
+    end
+
+    it 'returns false when block raises NameError' do
+      expect(described_class.optional_dependency { raise NameError }).to be(false)
+    end
+
+    it 'returns true when require succeeds' do
+      allow(described_class).to receive(:require).with('some_lib').and_return(true)
+      expect(described_class.optional_dependency('some_lib')).to be(true)
+    end
+
+    it 'returns true when block succeeds' do
+      expect(described_class.optional_dependency { 123 }).to be(true)
     end
   end
 end

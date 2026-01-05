@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
-require 'faraday'
 require 'simplecov'
 
 SimpleCov.start do
   add_filter %w[spec/ .github/]
 end
 
+require 'faraday'
+
 require_relative '../lib/faraday/gzip'
+
+Dir[File.join(__dir__, 'support/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -22,4 +25,6 @@ RSpec.configure do |config|
 
   config.order = :random
   Kernel.srand config.seed
+
+  config.include FaradayGzipSpecHelpers
 end
