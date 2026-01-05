@@ -1,12 +1,16 @@
 # Changelog
 
-## 3.1.0
+## 3.1.0 (05-Jan-2026)
 
-* Handle more edge cases, update tests
+* Improve handling of edge cases and malformed `Content-Encoding` headers
+* Support multiple encodings and respect `identity` responses
+* Avoid modifying streaming and non-string response bodies
+* Normalize response headers after decompression
+* Update and expand test coverage, test with Ruby 4.0
 
 ## 3.0.4 (06-Apr-2025)
 
-* Require StringIO that might not always be readily available
+* Require `StringIO` that might not always be readily available
 
 ## 3.0.3 (25-Feb-2025)
 

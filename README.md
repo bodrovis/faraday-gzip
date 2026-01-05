@@ -6,7 +6,7 @@
 [![Maintainability](https://qlty.sh/gh/bodrovis/projects/faraday-gzip/maintainability.svg)](https://qlty.sh/gh/bodrovis/projects/faraday-gzip)
 [![Code Coverage](https://qlty.sh/gh/bodrovis/projects/faraday-gzip/coverage.svg)](https://qlty.sh/gh/bodrovis/projects/faraday-gzip)
 
-The `Gzip` middleware for Faraday 1 and 2 adds the necessary `Accept-Encoding` headers and automatically decompresses the response. If the "Accept-Encoding" header isn't set in the request, it defaults to `gzip,deflate` and appropriately handles the server's compressed response. This functionality resembles what Ruby does internally in `Net::HTTP#get`. If [Brotli](https://github.com/miyucy/brotli) is included in your Gemfile, the middleware also adds `br` to the header for Brotli support.
+The `Gzip` middleware for Faraday 1 and 2 adds appropriate `Accept-Encoding` request headers and automatically decompresses supported response bodies (`gzip`, `deflate`, and optionally `br`). If the `Accept-Encoding` header is not explicitly set, it defaults to `gzip,deflate` and includes `br` when [Brotli](https://github.com/miyucy/brotli) support is available. The middleware safely handles multiple and malformed `Content-Encoding` headers, and avoids modifying unsupported or streaming response bodies. This behavior is similar in spirit to Ruby's internal handling in `Net::HTTP#get`, while remaining conservative to preserve compatibility with Faraday adapters.
 
 ## Prerequisites
 
