@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.310.0
+      uses: ruby/setup-ruby@v1.314.0
       with:
         ruby-version: 4.0
         bundler-cache: true
@@ -37,7 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.310.0
+      uses: ruby/setup-ruby@v1.314.0
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
