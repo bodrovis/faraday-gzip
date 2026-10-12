@@ -49,51 +49,31 @@ module Faraday
 
       # Finds a proper processor
       def find_processor(response_env)
-        body = response_env[:body]
-
         encodings = parse_content_encoding(
           response_env[:response_headers][CONTENT_ENCODING]
         )
-        return nil if encodings.empty? || encodings.include?(IDENTITY)
-
-        # If body is nil/empty, we still want to normalize headers:
-        # Content-Encoding is meaningless without an encoded body.
-        return ->(b) { b } if body_nil_or_empty?(body)
+        return nil if skip_decompression?(response_env, encodings)
 
         chain = processor_chain(encodings)
         return nil if chain.empty?
 
-        ->(b) { chain.reduce(b) { |acc, fn| fn.call(acc) } }
+        ->(body) { chain.reduce(body) { |acc, fn| fn.call(acc) } }
       end
 
       # Calls the proper processor to decompress body
       def reset_body(env, processor)
         return if processor.nil?
 
-        body    = env[:body]
-        headers = env[:response_headers]
+        body = processor.call(env[:body])
 
-        # Don't touch streaming / IO-like bodies.
-        return unless body.is_a?(String) || body_nil_or_empty?(body)
-
-        if body.is_a?(String)
-          env[:body] = processor.call(body)
-          headers[CONTENT_LENGTH] = env[:body].bytesize
-        end
-
-        # Normalize encoding header even for nil/empty body.
-        headers.delete(CONTENT_ENCODING)
+        env[:body] = body
+        env[:response_headers][CONTENT_LENGTH] = body.bytesize
+        env[:response_headers].delete(CONTENT_ENCODING)
       end
 
       # Process gzip
       def uncompress_gzip(body)
-        io = StringIO.new(body)
-        gzip_reader = Zlib::GzipReader.new(io, encoding: 'ASCII-8BIT')
-        begin
-          gzip_reader.read
-        ensure
-          gzip_reader.close
-        end
+        Zlib::GzipReader.zcat(StringIO.new(body))
       end
 
       # Process deflate
@@ -118,14 +98,13 @@ module Faraday
 
       private
 
-      def body_nil_or_empty?(body)
-        return true if body.nil?
-        return body.empty? if body.respond_to?(:empty?)
-        # rubocop:disable Style/ZeroLengthPredicate
-        return body.size.zero? if body.respond_to?(:size)
-        # rubocop:enable Style/ZeroLengthPredicate
+      def skip_decompression?(env, encodings)
+        body = env[:body]
 
-        false
+        return true unless body.is_a?(String) && !body.empty?
+        return true if env[:status] == 206
+
+        encodings.empty? || encodings.include?(IDENTITY)
       end
 
       def parse_content_encoding(value)
@@ -139,8 +118,11 @@ module Faraday
 
       # Decode in reverse order of application:
       # "gzip, br"  => br -> gzip
+      # If the encoding is unknown, do not touch the content
       def processor_chain(encodings)
-        encodings.reverse.filter_map { |enc| processors[enc] }
+        return [] unless encodings.all? { |enc| processors[enc] }
+
+        encodings.reverse.map { |enc| processors[enc] }
       end
 
       def processors

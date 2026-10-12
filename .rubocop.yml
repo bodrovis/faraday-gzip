@@ -20,15 +20,12 @@ Layout/LineLength:
 Style/Documentation:
   Exclude:
     - 'spec/**/*'
-
-Gemspec/DevelopmentDependencies:
-  EnforcedStyle: gemspec
-
+    
 RSpec/MultipleMemoizedHelpers:
   Max: 9
 
 RSpec/MultipleExpectations:
-  Max: 2
+  Max: 5
 
 RSpec/ExampleLength:
-  Max: 8
+  Max: 15

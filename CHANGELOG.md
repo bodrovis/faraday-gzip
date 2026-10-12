@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.0 (12-Oct-2026)
+
+- Moved development dependencies to `Gemfile` and improved SimpleCov compatibility across Ruby versions.
+- Simplified response decompression logic.
+- Prevented partial decompression when unsupported content encodings are present.
+- Preserved response headers for empty, non-string, and partial (`206`) responses.
+- Added support for concatenated gzip streams.
+- Added regression tests for encoding chains, partial responses, and concatenated gzip streams.
+- Fixed test helpers to properly initialize HTTP response environments.
+
 ## 3.1.0 (05-Jan-2026)
 
 * Improve handling of edge cases and malformed `Content-Encoding` headers

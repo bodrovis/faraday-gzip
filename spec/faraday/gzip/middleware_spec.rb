@@ -94,6 +94,35 @@ RSpec.describe Faraday::Gzip::Middleware do
       it_behaves_like 'decoded response'
     end
 
+    context 'when gzip contains concatenated members' do
+      let(:uncompressed_body) { 'hello world' }
+      let(:compressed) { gzip_deflate('hello ') + gzip_deflate('world') }
+
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => compressed.bytesize }
+        )
+      end
+
+      it_behaves_like 'decoded response'
+    end
+
+    context 'when deflate and gzip are combined' do
+      let(:compressed) { gzip_deflate(zlib_deflate(uncompressed_body)) }
+
+      let(:response) do
+        process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: { 'Content-Encoding' => 'deflate, gzip', 'Content-Length' => compressed.bytesize }
+        )
+      end
+
+      it_behaves_like 'decoded response'
+    end
+
     context 'when multiple encodings', if: described_class::BROTLI_SUPPORTED do
       let(:compressed) { Brotli.deflate(gzip_deflate(uncompressed_body)) }
       let(:response) do
@@ -135,26 +164,66 @@ RSpec.describe Faraday::Gzip::Middleware do
   end
 
   describe 'edge cases' do
-    it 'removes Content-Encoding for empty body and preserves length' do
+    it 'preserves headers for empty body' do
       res = process_through_middleware(
         middleware,
         body: '',
-        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 }
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 123 }
       )
 
-      expect(res.headers['Content-Length']).to eq(0)
-      expect(res.headers['Content-Encoding']).to be_nil
+      expect(res.body).to eq('')
+      expect(res.headers['Content-Length']).to eq(123)
+      expect(res.headers['Content-Encoding']).to eq('gzip')
     end
 
-    it 'removes Content-Encoding for nil body and preserves length' do
+    it 'preserves headers for nil body' do
       res = process_through_middleware(
         middleware,
         body: nil,
-        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 0 }
+        headers: { 'Content-Encoding' => 'gzip', 'Content-Length' => 123 }
       )
 
-      expect(res.headers['Content-Length']).to eq(0)
-      expect(res.headers['Content-Encoding']).to be_nil
+      expect(res.body).to be_nil
+      expect(res.headers['Content-Length']).to eq(123)
+      expect(res.headers['Content-Encoding']).to eq('gzip')
+    end
+
+    ['gzip, zstd', 'zstd, gzip'].each do |encoding|
+      it "does not partially decode #{encoding}" do
+        compressed = gzip_deflate(uncompressed_body)
+
+        res = process_through_middleware(
+          middleware,
+          body: compressed,
+          headers: {
+            'Content-Encoding' => encoding,
+            'Content-Length' => compressed.bytesize
+          }
+        )
+
+        expect(res.body).to eq(compressed)
+        expect(res.headers['Content-Encoding']).to eq(encoding)
+        expect(res.headers['Content-Length']).to eq(compressed.bytesize)
+      end
+    end
+
+    it 'does not decode partial responses' do
+      compressed = gzip_deflate(uncompressed_body)
+
+      res = process_through_middleware(
+        middleware,
+        body: compressed,
+        headers: {
+          'Content-Encoding' => 'gzip',
+          'Content-Length' => compressed.bytesize
+        }
+      ) do |env|
+        env[:status] = 206
+      end
+
+      expect(res.body).to eq(compressed)
+      expect(res.headers['Content-Encoding']).to eq('gzip')
+      expect(res.headers['Content-Length']).to eq(compressed.bytesize)
     end
 
     it 'does not modify identity responses' do

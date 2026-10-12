@@ -3,7 +3,13 @@
 require 'simplecov'
 
 SimpleCov.start do
-  add_filter %w[spec/ .github/]
+  filters = %w[spec/ .github/]
+
+  if SimpleCov.respond_to?(:skip)
+    skip filters
+  else
+    add_filter filters
+  end
 end
 
 require 'faraday'

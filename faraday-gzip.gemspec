@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     'bug_tracker_uri' => "#{github_uri}/issues",
     'changelog_uri' => "#{github_uri}/blob/master/CHANGELOG.md",
-    'documentation_uri' => "http://www.rubydoc.info/gems/#{spec.name}/#{spec.version}",
+    'documentation_uri' => "https://www.rubydoc.info/gems/#{spec.name}/#{spec.version}",
     'source_code_uri' => github_uri,
     'rubygems_mfa_required' => 'true'
   }
@@ -36,12 +36,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday', '>= 2.0', '< 3'
   # disable on JRuby till https://github.com/ruby/zlib/issues/38 is fixed
   spec.add_dependency 'zlib', '~> 3.0' unless java_platform
-
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'simplecov', '~> 0.22'
-
-  spec.add_development_dependency 'rubocop', '~> 1.82'
-  spec.add_development_dependency 'rubocop-performance', '~> 1.26'
-  spec.add_development_dependency 'rubocop-rspec', '~> 3.8'
 end

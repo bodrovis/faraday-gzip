@@ -6,7 +6,8 @@ require 'stringio'
 module FaradayGzipSpecHelpers
   def process_through_middleware(middleware, body:, headers: {}, content_type: nil, request_options: {})
     env = {
-      body: body,
+      status: 200,
+      response_body: body,
       request: request_options,
       request_headers: Faraday::Utils::Headers.new,
       response_headers: Faraday::Utils::Headers.new(headers)

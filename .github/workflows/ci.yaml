@@ -11,9 +11,11 @@ jobs:
   rubocop:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.326.0
+      uses: ruby/setup-ruby@762794c140bbeda0f1224786aa33b4b46783a6c1
       with:
         ruby-version: 4.0
         bundler-cache: true
@@ -34,10 +36,13 @@ jobs:
           - 4.0
           - jruby-9.4
           - jruby-10.0
+          - jruby-10.1
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        persist-credentials: false
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.326.0
+      uses: ruby/setup-ruby@762794c140bbeda0f1224786aa33b4b46783a6c1
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
